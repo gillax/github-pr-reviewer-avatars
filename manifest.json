@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "GitHub PR Reviewer Avatars",
+  "version": "0.1.0",
+  "description": "Shows reviewer avatars on the GitHub pull request list page. Open source and auditable: your token only ever goes to api.github.com.",
+  "permissions": ["storage"],
+  "host_permissions": ["https://github.com/*", "https://api.github.com/*"],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*/*/pulls", "https://github.com/*/*/pulls?*"],
+      "js": [
+        "src/lib/parse.js",
+        "src/lib/query.js",
+        "src/lib/transform.js",
+        "src/content.js"
+      ],
+      "css": ["src/styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "options_ui": {
+    "page": "src/options.html",
+    "open_in_tab": true
+  },
+  "action": {
+    "default_title": "GitHub PR Reviewer Avatars — open settings"
+  }
+}

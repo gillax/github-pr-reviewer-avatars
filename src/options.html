@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GitHub PR Reviewer Avatars — Settings</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="prra-options">
+    <main class="prra-options__card">
+      <h1>GitHub PR Reviewer Avatars</h1>
+      <p class="prra-options__intro">
+        This extension adds reviewer avatars to the GitHub pull request list
+        (<code>github.com/{owner}/{repo}/pulls</code>). It needs a GitHub
+        Personal Access Token (PAT) to read reviewer data — including from
+        private repositories you have access to.
+      </p>
+
+      <section class="prra-options__section">
+        <label class="prra-options__label" for="pat">Personal Access Token</label>
+        <input
+          id="pat"
+          type="password"
+          class="prra-options__input"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="ghp_… or github_pat_…"
+        />
+        <div class="prra-options__buttons">
+          <button id="toggle-visibility" type="button" class="prra-options__btn-secondary">
+            Show
+          </button>
+          <button id="test" type="button" class="prra-options__btn-secondary">
+            Test connection
+          </button>
+          <button id="save" type="button" class="prra-options__btn-primary">Save</button>
+          <button id="clear" type="button" class="prra-options__btn-secondary">Clear</button>
+        </div>
+        <p id="status" class="prra-options__status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="prra-options__section">
+        <h2>How your token is handled</h2>
+        <ul class="prra-options__list">
+          <li>
+            Stored only in <code>chrome.storage.local</code> on this device — it
+            is <strong>never</strong> synced to your Google account.
+          </li>
+          <li>
+            Used only by the extension's background service worker, which sends
+            it <strong>only</strong> to <code>https://api.github.com/graphql</code>.
+          </li>
+          <li>
+            The page-side code never reads or receives the token, so it cannot
+            appear in any website's network traffic.
+          </li>
+          <li>
+            This extension is open source — read the code to verify all of the
+            above.
+          </li>
+        </ul>
+      </section>
+
+      <section class="prra-options__section">
+        <h2>Creating a token</h2>
+        <p>Either type of GitHub PAT works:</p>
+        <ul class="prra-options__list">
+          <li>
+            <a
+              href="https://github.com/settings/tokens/new?scopes=repo&description=PR%20Reviewer%20Avatars"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Classic token</a
+            >
+            with the <code>repo</code> scope (covers public and private repos).
+          </li>
+          <li>
+            <a
+              href="https://github.com/settings/personal-access-tokens/new"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Fine-grained token</a
+            >
+            scoped to the repositories you want, with
+            <strong>Repository permissions → Pull requests: Read-only</strong>.
+          </li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>

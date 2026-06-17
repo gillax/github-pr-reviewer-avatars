@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Logs / editor noise
+*.log
+*.swp
+.idea/
+.vscode/

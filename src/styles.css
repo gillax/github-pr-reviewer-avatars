@@ -1,0 +1,249 @@
+/*
+ * styles.css — styles for (a) the avatars injected into GitHub's PR list and
+ * (b) the extension's own options page.
+ *
+ * The avatar rules are intentionally minimal and use GitHub's CSS variables
+ * where possible so they sit naturally in both light and dark themes.
+ */
+
+/* ---------------------------------------------------------------------------
+ * Injected reviewer avatars (content script, runs on github.com)
+ * ------------------------------------------------------------------------- */
+
+.prra-reviewers {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.prra-reviewer {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  line-height: 0;
+}
+
+.prra-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  /* Subtle ring so overlapping avatars and the page background stay readable.
+     Uses GitHub's theme variable with a sensible fallback. */
+  box-shadow: 0 0 0 1px var(--color-canvas-default, #ffffff);
+  background: var(--color-neutral-muted, #d0d7de);
+  object-fit: cover;
+  display: block;
+}
+
+/* Slight overlap when several reviewers are shown, like other avatar stacks. */
+.prra-reviewer + .prra-reviewer .prra-avatar {
+  margin-left: -6px;
+}
+
+/* Team reviewers have no avatar in the MVP query, so show a compact label. */
+.prra-reviewer--team {
+  font-size: 11px;
+  line-height: 18px;
+  padding: 0 6px;
+  margin-left: 2px;
+  border-radius: 999px;
+  color: var(--color-fg-muted, #57606a);
+  background: var(--color-neutral-muted, rgba(175, 184, 193, 0.2));
+  white-space: nowrap;
+}
+
+/* Subtle link shown when no token is configured. */
+.prra-options-link {
+  margin-left: 8px;
+  font-size: 12px;
+  color: var(--color-fg-muted, #57606a);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+/*
+ * FUTURE (out of scope for the MVP): review-state colour coding. The injected
+ * elements already carry data-state (APPROVED / CHANGES_REQUESTED / COMMENTED /
+ * PENDING), so enabling colours is purely a matter of un-commenting rules like
+ * these — no JS or query changes required.
+ *
+ * .prra-reviewer[data-state="APPROVED"] .prra-avatar {
+ *   box-shadow: 0 0 0 2px var(--color-success-emphasis, #1a7f37);
+ * }
+ * .prra-reviewer[data-state="CHANGES_REQUESTED"] .prra-avatar {
+ *   box-shadow: 0 0 0 2px var(--color-danger-emphasis, #cf222e);
+ * }
+ * .prra-reviewer[data-state="PENDING"] .prra-avatar {
+ *   box-shadow: 0 0 0 2px var(--color-neutral-emphasis, #6e7781);
+ * }
+ */
+
+/* ---------------------------------------------------------------------------
+ * Options page (options.html)
+ * ------------------------------------------------------------------------- */
+
+.prra-options {
+  margin: 0;
+  padding: 24px;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  color: #1f2328;
+  background: #ffffff;
+}
+
+.prra-options__card {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.prra-options h1 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.prra-options h2 {
+  font-size: 15px;
+  margin: 0 0 8px;
+}
+
+.prra-options__intro {
+  color: #57606a;
+  line-height: 1.5;
+}
+
+.prra-options__section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #d0d7de;
+}
+
+.prra-options__label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.prra-options__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+}
+
+.prra-options__input:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.3);
+}
+
+.prra-options__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.prra-options__btn-primary,
+.prra-options__btn-secondary {
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #d0d7de;
+}
+
+.prra-options__btn-primary {
+  color: #ffffff;
+  background: #1f883d;
+  border-color: rgba(31, 35, 40, 0.15);
+}
+
+.prra-options__btn-primary:hover {
+  background: #1a7f37;
+}
+
+.prra-options__btn-secondary {
+  color: #24292f;
+  background: #f6f8fa;
+}
+
+.prra-options__btn-secondary:hover {
+  background: #f3f4f6;
+}
+
+.prra-options__status {
+  margin-top: 12px;
+  min-height: 20px;
+  font-size: 13px;
+}
+
+.prra-options__status--info {
+  color: #57606a;
+}
+
+.prra-options__status--success {
+  color: #1a7f37;
+}
+
+.prra-options__status--error {
+  color: #cf222e;
+}
+
+.prra-options__list {
+  line-height: 1.6;
+  color: #57606a;
+  padding-left: 20px;
+}
+
+.prra-options code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 85%;
+  padding: 2px 5px;
+  border-radius: 6px;
+  background: rgba(175, 184, 193, 0.2);
+}
+
+.prra-options a {
+  color: #0969da;
+}
+
+/* Dark theme for the options page when the OS prefers dark. */
+@media (prefers-color-scheme: dark) {
+  .prra-options {
+    color: #e6edf3;
+    background: #0d1117;
+  }
+  .prra-options__intro,
+  .prra-options__list,
+  .prra-options__status--info {
+    color: #8b949e;
+  }
+  .prra-options__section {
+    border-top-color: #30363d;
+  }
+  .prra-options__input {
+    color: #e6edf3;
+    background: #0d1117;
+    border-color: #30363d;
+  }
+  .prra-options__btn-secondary {
+    color: #e6edf3;
+    background: #21262d;
+    border-color: #30363d;
+  }
+  .prra-options__btn-secondary:hover {
+    background: #30363d;
+  }
+  .prra-options code {
+    background: rgba(110, 118, 129, 0.4);
+  }
+  .prra-options a {
+    color: #2f81f7;
+  }
+}
