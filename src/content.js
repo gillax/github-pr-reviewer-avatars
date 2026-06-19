@@ -19,7 +19,7 @@
  * possible for a content script without a bundler).
  */
 
-/* global parseOwnerRepoFromUrl, extractPrNumberFromRow, normalizePrNumbers, viewerIsReviewer */
+/* global parseOwnerRepoFromUrl, extractPrNumberFromRow, normalizePrNumbers, viewerReviewState */
 
 (() => {
   'use strict';
@@ -150,9 +150,11 @@
         if (reviewer.url) {
           link.href = reviewer.url;
         }
-        link.title = `Reviewer: ${reviewer.login}`;
-        // data-state is set now (MVP ignores it visually) so the future
-        // review-state colour feature can style purely via CSS.
+        // Human-readable state in the tooltip (doubles as a legend for the
+        // ring colours): "Reviewer: alice (approved)" / "(changes requested)".
+        const stateLabel = (reviewer.state || 'PENDING').toLowerCase().replace(/_/g, ' ');
+        link.title = `Reviewer: ${reviewer.login} (${stateLabel})`;
+        // data-state drives the review-state ring colour purely via CSS.
         link.setAttribute('data-state', reviewer.state || 'PENDING');
 
         const img = document.createElement('img');
@@ -222,9 +224,12 @@
 
       const reviewers = reviewersByNumber[number];
 
-      // Highlight the row when you are a reviewer. Toggle both ways so a
-      // re-render that no longer matches clears a previous highlight.
-      if (viewerIsReviewer(reviewers, viewerLogin)) {
+      // Highlight the row when you are a reviewer who has NOT yet approved, so
+      // PRs still awaiting your review stand out (approved-by-you PRs are left
+      // un-highlighted). Toggle both ways so a re-render that no longer matches
+      // clears a previous highlight.
+      const myReviewState = viewerReviewState(reviewers, viewerLogin);
+      if (myReviewState !== undefined && myReviewState !== 'APPROVED') {
         row.classList.add(MINE_CLASS);
       } else {
         row.classList.remove(MINE_CLASS);

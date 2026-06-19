@@ -206,24 +206,39 @@ function viewerLoginFromResponse(response) {
 }
 
 /**
- * Is `viewerLogin` one of the User reviewers in `reviewers`? Case-insensitive,
+ * Find the viewer's OWN review state within a reviewer list. Case-insensitive,
  * matching GitHub's login semantics. Teams are NOT expanded to their members,
- * so only a direct user-reviewer match counts (a team you belong to won't flag
- * the PR — see README limitations).
+ * so only a direct user-reviewer match counts.
+ *
+ * @param {object[]} reviewers - output of reviewersForPrNode.
+ * @param {string} viewerLogin
+ * @returns {string|null|undefined}
+ *   - a state string ("APPROVED" / "CHANGES_REQUESTED" / "COMMENTED" / ...) or
+ *     null (requested but not yet reviewed) when the viewer IS a reviewer;
+ *   - undefined when the viewer is NOT among the reviewers.
+ */
+function viewerReviewState(reviewers, viewerLogin) {
+  if (!Array.isArray(reviewers) || !viewerLogin) {
+    return undefined;
+  }
+  const target = String(viewerLogin).toLowerCase();
+  const match = reviewers.find(
+    (r) =>
+      r && r.type === 'User' && typeof r.login === 'string' && r.login.toLowerCase() === target
+  );
+  return match ? match.state || null : undefined;
+}
+
+/**
+ * Is `viewerLogin` one of the User reviewers in `reviewers`? (Membership only,
+ * regardless of review state.) See viewerReviewState for the semantics.
  *
  * @param {object[]} reviewers - output of reviewersForPrNode.
  * @param {string} viewerLogin
  * @returns {boolean}
  */
 function viewerIsReviewer(reviewers, viewerLogin) {
-  if (!Array.isArray(reviewers) || !viewerLogin) {
-    return false;
-  }
-  const target = String(viewerLogin).toLowerCase();
-  return reviewers.some(
-    (r) =>
-      r && r.type === 'User' && typeof r.login === 'string' && r.login.toLowerCase() === target
-  );
+  return viewerReviewState(reviewers, viewerLogin) !== undefined;
 }
 
 // Module export guard — see parse.js for rationale.
@@ -235,6 +250,7 @@ if (typeof module !== 'undefined' && module.exports) {
     reviewersForPrNode,
     transformResponse,
     viewerLoginFromResponse,
+    viewerReviewState,
     viewerIsReviewer,
   };
 }

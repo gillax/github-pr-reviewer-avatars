@@ -24,21 +24,27 @@ has no build step — what you see in the repository is exactly what runs.
 You can confirm all of this by reading the code — `grep` for `api.github.com`
 and `Authorization` and you will find them only in `src/background.js`.
 
-## What it shows (MVP)
+## What it shows
 
-- The avatar of every reviewer on each PR in the list.
-- "Reviewers" means the **union** of:
+On each PR row, on its own line just below the "#&lt;number&gt; opened … by
+&lt;author&gt;" metadata, the extension shows:
+
+- **The avatar of every reviewer.** "Reviewers" means the **union** of:
   - people still **requested** to review (`reviewRequests`), and
   - people who have **already reviewed** (`latestReviews`).
   This union matters because approving a PR removes you from `reviewRequests`;
   without the union, anyone who already approved would disappear from the list.
+- **A review-state ring around each avatar**, coloured by that person's latest
+  review: green = approved, red = changes requested, gold = commented, grey =
+  pending (requested but not yet reviewed). The state is also in the avatar's
+  tooltip, e.g. "Reviewer: alice (approved)".
 - **Team** reviewers (which have no personal avatar) are shown as a small text
   label so they are not silently dropped.
 
-Review **state colours** (approved / changes-requested / pending) are **not**
-shown yet — that is the next iteration. The data needed for it (`state`) is
-already fetched and stored on each injected element as `data-state`, so adding
-colours later is a CSS-only change.
+It also **highlights the whole PR row** (a subtle background + left accent) when
+**you** (the token owner) are a reviewer who has **not yet approved** — so PRs
+still awaiting your review stand out. PRs you have already approved are not
+highlighted.
 
 ## Install (load unpacked)
 
@@ -137,7 +143,9 @@ response transformation.)
 - Only the repository PR list page (`/{owner}/{repo}/pulls`) on **github.com**.
 - Not the global dashboards (`/pulls`, `/pulls/assigned`) — possible future work.
 - Not GitHub Enterprise Server (custom hosts) — possible future work.
-- No review-state colours yet (see "What it shows" above).
+- The "you are a reviewer" highlight matches **direct** user review requests
+  only; being a member of a **team** that was requested does not flag the PR
+  (teams are not expanded to their members).
 
 ## License
 

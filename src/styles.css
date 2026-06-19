@@ -15,7 +15,7 @@
 .prra-reviewers {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   margin-top: 4px;
 }
 
@@ -49,10 +49,7 @@
   display: block;
 }
 
-/* Slight overlap when several reviewers are shown, like other avatar stacks. */
-.prra-reviewer + .prra-reviewer .prra-avatar {
-  margin-left: -6px;
-}
+/* Avatars sit side by side (no overlap) so each review-state ring stays visible. */
 
 /* Team reviewers have no avatar in the MVP query, so show a compact label. */
 .prra-reviewer--team {
@@ -76,21 +73,41 @@
 }
 
 /*
- * FUTURE (out of scope for the MVP): review-state colour coding. The injected
- * elements already carry data-state (APPROVED / CHANGES_REQUESTED / COMMENTED /
- * PENDING), so enabling colours is purely a matter of un-commenting rules like
- * these — no JS or query changes required.
- *
- * .prra-reviewer[data-state="APPROVED"] .prra-avatar {
- *   box-shadow: 0 0 0 2px var(--color-success-emphasis, #1a7f37);
- * }
- * .prra-reviewer[data-state="CHANGES_REQUESTED"] .prra-avatar {
- *   box-shadow: 0 0 0 2px var(--color-danger-emphasis, #cf222e);
- * }
- * .prra-reviewer[data-state="PENDING"] .prra-avatar {
- *   box-shadow: 0 0 0 2px var(--color-neutral-emphasis, #6e7781);
- * }
+ * Review-state colour coding: a coloured ring around each reviewer's avatar.
+ * Every .prra-reviewer carries data-state (APPROVED / CHANGES_REQUESTED /
+ * COMMENTED / PENDING / DISMISSED). Colours use GitHub's theme variables (so
+ * they adapt to light/dark) with fallbacks. The inner 1px canvas ring is kept
+ * for separation and the coloured ring sits just outside it.
  */
+.prra-reviewer[data-state='APPROVED'] .prra-avatar {
+  box-shadow:
+    0 0 0 1px var(--color-canvas-default, #ffffff),
+    0 0 0 3px var(--fgColor-success, var(--color-success-fg, #1a7f37));
+}
+.prra-reviewer[data-state='CHANGES_REQUESTED'] .prra-avatar {
+  box-shadow:
+    0 0 0 1px var(--color-canvas-default, #ffffff),
+    0 0 0 3px var(--fgColor-danger, var(--color-danger-fg, #cf222e));
+}
+.prra-reviewer[data-state='COMMENTED'] .prra-avatar {
+  box-shadow:
+    0 0 0 1px var(--color-canvas-default, #ffffff),
+    0 0 0 3px var(--fgColor-attention, var(--color-attention-fg, #9a6700));
+}
+.prra-reviewer[data-state='PENDING'] .prra-avatar,
+.prra-reviewer[data-state='DISMISSED'] .prra-avatar {
+  box-shadow:
+    0 0 0 1px var(--color-canvas-default, #ffffff),
+    0 0 0 3px var(--borderColor-muted, var(--color-border-muted, #d0d7de));
+}
+
+/* Team labels echo the same state colours via a left border accent. */
+.prra-reviewer--team[data-state='APPROVED'] {
+  box-shadow: inset 3px 0 0 0 var(--fgColor-success, var(--color-success-fg, #1a7f37));
+}
+.prra-reviewer--team[data-state='CHANGES_REQUESTED'] {
+  box-shadow: inset 3px 0 0 0 var(--fgColor-danger, var(--color-danger-fg, #cf222e));
+}
 
 /* ---------------------------------------------------------------------------
  * Options page (options.html)

@@ -10,6 +10,7 @@ const {
   reviewersForPrNode,
   transformResponse,
   viewerLoginFromResponse,
+  viewerReviewState,
   viewerIsReviewer,
 } = require('../src/lib/transform.js');
 
@@ -296,4 +297,45 @@ test('viewerIsReviewer: empty / missing inputs -> false', () => {
   assert.equal(viewerIsReviewer(null, 'alice'), false);
   assert.equal(viewerIsReviewer([{ type: 'User', login: 'alice' }], ''), false);
   assert.equal(viewerIsReviewer([{ type: 'User', login: 'alice' }], null), false);
+});
+
+test("viewerReviewState: returns the viewer's own state when they are a reviewer", () => {
+  const reviewers = [
+    { type: 'User', login: 'Alice', state: 'APPROVED' },
+    { type: 'User', login: 'bob', state: null },
+  ];
+  assert.equal(viewerReviewState(reviewers, 'alice'), 'APPROVED');
+  assert.equal(viewerReviewState(reviewers, 'BOB'), null); // requested, not yet reviewed
+});
+
+test('viewerReviewState: undefined when the viewer is NOT among the reviewers', () => {
+  assert.equal(
+    viewerReviewState([{ type: 'User', login: 'alice', state: 'APPROVED' }], 'carol'),
+    undefined
+  );
+});
+
+test('viewerReviewState: a Team named like the viewer does not count', () => {
+  assert.equal(
+    viewerReviewState([{ type: 'Team', name: 'alice', slug: 'alice', state: null }], 'alice'),
+    undefined
+  );
+});
+
+test('viewerReviewState: empty / missing inputs -> undefined', () => {
+  assert.equal(viewerReviewState([], 'alice'), undefined);
+  assert.equal(viewerReviewState(null, 'alice'), undefined);
+  assert.equal(viewerReviewState([{ type: 'User', login: 'alice', state: 'APPROVED' }], ''), undefined);
+});
+
+test('viewerReviewState: drives the row-highlight rule (reviewer AND not approved)', () => {
+  // This mirrors exactly what content.js does to decide the "mine" highlight.
+  const shouldHighlight = (reviewers) => {
+    const s = viewerReviewState(reviewers, 'me');
+    return s !== undefined && s !== 'APPROVED';
+  };
+  assert.equal(shouldHighlight([{ type: 'User', login: 'me', state: 'APPROVED' }]), false);
+  assert.equal(shouldHighlight([{ type: 'User', login: 'me', state: null }]), true);
+  assert.equal(shouldHighlight([{ type: 'User', login: 'me', state: 'CHANGES_REQUESTED' }]), true);
+  assert.equal(shouldHighlight([{ type: 'User', login: 'someone', state: null }]), false);
 });
