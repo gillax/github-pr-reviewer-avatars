@@ -18,6 +18,13 @@
   vertical-align: middle;
 }
 
+/* When placed inside GitHub's right-hand metadata ("Reviews") column, sit as a
+   flex item immediately left of the assignee avatars and align with them. */
+.prra-reviewers.prra-in-column {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
 .prra-reviewer {
   display: inline-flex;
   align-items: center;
