@@ -9,6 +9,8 @@ const {
   normalizeReviewNode,
   reviewersForPrNode,
   transformResponse,
+  viewerLoginFromResponse,
+  viewerIsReviewer,
 } = require('../src/lib/transform.js');
 
 // --- small builders to keep the GraphQL fixtures readable -------------------
@@ -255,4 +257,43 @@ test('transformResponse: missing data / repository -> {}', () => {
   assert.deepEqual(transformResponse({ data: { repository: null } }), {});
   assert.deepEqual(transformResponse({ errors: [{ message: 'Bad credentials' }] }), {});
   assert.deepEqual(transformResponse(null), {});
+});
+
+// ---------------------------------------------------------------------------
+// viewerLoginFromResponse + viewerIsReviewer — the "I am a reviewer" highlight
+// ---------------------------------------------------------------------------
+
+test('viewerLoginFromResponse: reads data.viewer.login when present', () => {
+  assert.equal(viewerLoginFromResponse({ data: { viewer: { login: 'octocat' } } }), 'octocat');
+});
+
+test('viewerLoginFromResponse: missing / blank viewer -> null', () => {
+  assert.equal(viewerLoginFromResponse({ data: {} }), null);
+  assert.equal(viewerLoginFromResponse({}), null);
+  assert.equal(viewerLoginFromResponse(null), null);
+  assert.equal(viewerLoginFromResponse({ data: { viewer: { login: '' } } }), null);
+});
+
+test('viewerIsReviewer: true when the viewer is among the User reviewers (case-insensitive)', () => {
+  const reviewers = [
+    { type: 'User', login: 'Alice' },
+    { type: 'User', login: 'bob' },
+  ];
+  assert.equal(viewerIsReviewer(reviewers, 'alice'), true);
+  assert.equal(viewerIsReviewer(reviewers, 'BOB'), true);
+});
+
+test('viewerIsReviewer: false when the viewer is not among the reviewers', () => {
+  assert.equal(viewerIsReviewer([{ type: 'User', login: 'alice' }], 'carol'), false);
+});
+
+test('viewerIsReviewer: a Team named like the viewer does NOT count (direct user reviewers only)', () => {
+  assert.equal(viewerIsReviewer([{ type: 'Team', name: 'alice', slug: 'alice' }], 'alice'), false);
+});
+
+test('viewerIsReviewer: empty / missing inputs -> false', () => {
+  assert.equal(viewerIsReviewer([], 'alice'), false);
+  assert.equal(viewerIsReviewer(null, 'alice'), false);
+  assert.equal(viewerIsReviewer([{ type: 'User', login: 'alice' }], ''), false);
+  assert.equal(viewerIsReviewer([{ type: 'User', login: 'alice' }], null), false);
 });

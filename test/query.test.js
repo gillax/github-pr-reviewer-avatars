@@ -119,3 +119,11 @@ test('buildReviewersQuery: single-number request is well formed', () => {
   const closes = (built.query.match(/}/g) || []).length;
   assert.equal(opens, closes);
 });
+
+test('buildReviewersQuery: also requests the authenticated viewer login (for the "mine" highlight)', () => {
+  const built = buildReviewersQuery('o', 'r', [1]);
+  assert.ok(built);
+  assert.match(built.query, /viewer\s*{\s*login\s*}/);
+  // Still a single repository() block — viewer is a sibling top-level field.
+  assert.equal((built.query.match(/repository\(/g) || []).length, 1);
+});

@@ -19,6 +19,17 @@
   margin-top: 4px;
 }
 
+/* Highlight a PR row when YOU (the token owner) are one of its reviewers, so it
+   stands out in the list. Uses GitHub's own attention colour (which adapts to
+   light/dark themes) with safe fallbacks for older Primer versions. */
+.prra-mine {
+  background-color: var(
+    --bgColor-attention-muted,
+    var(--color-attention-subtle, rgba(187, 128, 9, 0.15))
+  ) !important;
+  box-shadow: inset 3px 0 0 0 var(--fgColor-attention, var(--color-attention-fg, #9a6700));
+}
+
 .prra-reviewer {
   display: inline-flex;
   align-items: center;

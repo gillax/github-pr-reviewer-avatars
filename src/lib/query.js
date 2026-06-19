@@ -97,6 +97,9 @@ function buildReviewersQuery(owner, repo, numbers) {
   }
 
   const query = `query($owner: String!, $name: String!) {
+  viewer {
+    login
+  }
   repository(owner: $owner, name: $name) {
 ${aliases}
   }

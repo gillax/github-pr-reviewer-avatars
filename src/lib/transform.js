@@ -191,6 +191,41 @@ function transformResponse(response) {
   return result;
 }
 
+/**
+ * Extract the authenticated viewer's login from a response that included a
+ * top-level `viewer { login }` selection (see query.js). Used to decide which
+ * PRs to highlight as "you are a reviewer".
+ *
+ * @param {object} response - parsed JSON.
+ * @returns {string|null}
+ */
+function viewerLoginFromResponse(response) {
+  const login =
+    response && response.data && response.data.viewer ? response.data.viewer.login : null;
+  return typeof login === 'string' && login ? login : null;
+}
+
+/**
+ * Is `viewerLogin` one of the User reviewers in `reviewers`? Case-insensitive,
+ * matching GitHub's login semantics. Teams are NOT expanded to their members,
+ * so only a direct user-reviewer match counts (a team you belong to won't flag
+ * the PR — see README limitations).
+ *
+ * @param {object[]} reviewers - output of reviewersForPrNode.
+ * @param {string} viewerLogin
+ * @returns {boolean}
+ */
+function viewerIsReviewer(reviewers, viewerLogin) {
+  if (!Array.isArray(reviewers) || !viewerLogin) {
+    return false;
+  }
+  const target = String(viewerLogin).toLowerCase();
+  return reviewers.some(
+    (r) =>
+      r && r.type === 'User' && typeof r.login === 'string' && r.login.toLowerCase() === target
+  );
+}
+
 // Module export guard — see parse.js for rationale.
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
@@ -199,5 +234,7 @@ if (typeof module !== 'undefined' && module.exports) {
     normalizeReviewNode,
     reviewersForPrNode,
     transformResponse,
+    viewerLoginFromResponse,
+    viewerIsReviewer,
   };
 }

@@ -19,7 +19,7 @@
  * possible for a content script without a bundler).
  */
 
-/* global parseOwnerRepoFromUrl, extractPrNumberFromRow, normalizePrNumbers */
+/* global parseOwnerRepoFromUrl, extractPrNumberFromRow, normalizePrNumbers, viewerIsReviewer */
 
 (() => {
   'use strict';
@@ -29,6 +29,7 @@
   const ROW_DECORATED_ATTR = 'data-prra-decorated';
   const CONTAINER_CLASS = 'prra-reviewers';
   const OPTIONS_LINK_CLASS = 'prra-options-link';
+  const MINE_CLASS = 'prra-mine'; // row highlight when YOU are a reviewer
 
   let running = false; // re-entrancy guard for run()
   let observer = null; // MutationObserver instance
@@ -205,10 +206,14 @@
    * marked decorated is skipped, and any stale container we previously added is
    * removed before re-rendering (so Turbo re-renders stay correct).
    *
+   * Also toggles MINE_CLASS on each row so PRs where YOU (the token owner) are a
+   * reviewer get a highlighted background.
+   *
    * @param {Element[]} rows
    * @param {{ [n: number]: object[] }} reviewersByNumber
+   * @param {string|null} viewerLogin - the token owner's login, for the highlight.
    */
-  function decorateRows(rows, reviewersByNumber) {
+  function decorateRows(rows, reviewersByNumber, viewerLogin) {
     for (const row of rows) {
       const number = extractPrNumberFromRow(row);
       if (number === null) {
@@ -216,6 +221,15 @@
       }
 
       const reviewers = reviewersByNumber[number];
+
+      // Highlight the row when you are a reviewer. Toggle both ways so a
+      // re-render that no longer matches clears a previous highlight.
+      if (viewerIsReviewer(reviewers, viewerLogin)) {
+        row.classList.add(MINE_CLASS);
+      } else {
+        row.classList.remove(MINE_CLASS);
+      }
+
       const el = buildReviewersEl(reviewers);
 
       // Remove any container we added on a previous pass for this row.
@@ -321,7 +335,7 @@
             response.partialErrors
           );
         }
-        decorateRows(undecorated, response.reviewers || {});
+        decorateRows(undecorated, response.reviewers || {}, response.viewerLogin || null);
         return;
       }
 

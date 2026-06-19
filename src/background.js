@@ -13,7 +13,7 @@
  * runs here and in the content script (and under Node in the unit tests).
  */
 
-/* global buildReviewersQuery, transformResponse */
+/* global buildReviewersQuery, transformResponse, viewerLoginFromResponse */
 
 importScripts('lib/parse.js', 'lib/query.js', 'lib/transform.js');
 
@@ -106,7 +106,9 @@ async function fetchReviewers(payload) {
   // many). Surface the errors for logging but still return whatever data came
   // back so the rest of the list decorates normally.
   const reviewers = transformResponse(json);
-  const result = { ok: true, reviewers };
+  // viewerLogin lets the content script highlight PRs where YOU are a reviewer.
+  // It is the token owner's own (public) login, not a secret.
+  const result = { ok: true, reviewers, viewerLogin: viewerLoginFromResponse(json) };
   if (json && Array.isArray(json.errors) && json.errors.length > 0) {
     result.partialErrors = json.errors.map((e) => (e && e.message) || 'unknown');
   }
