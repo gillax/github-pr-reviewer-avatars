@@ -10,18 +10,12 @@
  * Injected reviewer avatars (content script, runs on github.com)
  * ------------------------------------------------------------------------- */
 
+/* Reviewers render on their own row, just below the "#<n> opened … by <author>"
+   line in each PR's main column. */
 .prra-reviewers {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 2px;
-  margin-left: 8px;
-  vertical-align: middle;
-}
-
-/* When placed inside GitHub's right-hand metadata ("Reviews") column, sit as a
-   flex item immediately left of the assignee avatars and align with them. */
-.prra-reviewers.prra-in-column {
-  flex-shrink: 0;
   margin-top: 4px;
 }
 

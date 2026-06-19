@@ -64,91 +64,65 @@
   }
 
   /**
-   * Find the right-hand metadata column of a PR row — the "Reviews" column that
-   * also holds the assignee avatars and the comment count. Verified against the
-   * current github.com PR-list markup:
-   *   .js-issue-row > div.d-flex > [state col][main col][THIS col][mobile link]
-   * where THIS col is `div.col-md-3.text-right.no-wrap`. We fall back through
-   * progressively looser heuristics so a markup tweak does not silently break
-   * placement.
+   * Find the main content column of a PR row — the wide column holding the
+   * title, labels and the "#<number> opened … by <author>" metadata line.
+   * Verified against the current github.com PR-list markup:
+   *   .js-issue-row > div.d-flex > [state col][THIS .flex-auto.min-width-0 col][meta col]…
    *
    * @param {Element} row
    * @returns {Element|null}
    */
-  function findReviewsColumn(row) {
+  function findMainColumn(row) {
     const inner = row.querySelector(':scope > div') || row;
-    const cols = Array.from(inner.children).filter((c) => c.tagName === 'DIV');
-    // 1) The metadata column by its characteristic classes.
-    let col = cols.find(
-      (c) => /\bcol-md-3\b/.test(c.className) && /(text-right|no-wrap)/.test(c.className)
-    );
-    if (col) return col;
-    // 2) A non-main column that holds an assignee stack or is right-aligned.
-    col = cols.find(
-      (c) =>
-        !/flex-auto/.test(c.className) &&
-        (c.querySelector('.AvatarStack') || /text-right/.test(c.className))
-    );
-    if (col) return col;
-    // 3) The last non-main column.
-    const nonMain = cols.filter((c) => !/flex-auto/.test(c.className));
-    return nonMain[nonMain.length - 1] || null;
-  }
-
-  /**
-   * Within the Reviews column, find the direct child (slot) that contains the
-   * assignee avatars, so we can insert reviewers immediately to its LEFT.
-   *
-   * @param {Element} col
-   * @returns {Element|null} null when the PR has no assignees.
-   */
-  function findAssigneeSlot(col) {
-    const assignee = col.querySelector(
-      'a[aria-label$="assigned issues"], a.avatar.avatar-user, .AvatarStack'
-    );
-    if (!assignee) {
-      return null;
-    }
-    return Array.from(col.children).find((ch) => ch.contains(assignee)) || null;
-  }
-
-  /**
-   * Last-resort target when the Reviews column cannot be found (older/unknown
-   * markup): the row's "opened by" line, else the row itself. We always render
-   * something rather than nothing.
-   *
-   * @param {Element} row
-   * @returns {Element}
-   */
-  function findFallbackTarget(row) {
     return (
-      row.querySelector('.opened-by') ||
-      row.querySelector('[class*="opened-by"]') ||
-      row
+      Array.from(inner.children).find(
+        (c) => /flex-auto/.test(c.className) && /min-width-0/.test(c.className)
+      ) || null
     );
   }
 
   /**
-   * Place the reviewers element to the LEFT of the assignee avatars inside the
-   * Reviews column. With no assignees it goes at the column's left edge; with no
-   * column at all it falls back to the opened-by line.
+   * Within the main column, find the "opened by" metadata line — the row that
+   * shows "#<number> opened … by <author>". We insert reviewers just below it.
+   *
+   * @param {Element} mainCol
+   * @returns {Element|null}
+   */
+  function findOpenedByLine(mainCol) {
+    const openedBy = mainCol.querySelector('.opened-by');
+    if (openedBy) {
+      let line = openedBy;
+      while (line && line.parentElement !== mainCol) {
+        line = line.parentElement;
+      }
+      if (line) return line;
+    }
+    // Fallback: a muted, small metadata line directly under the title.
+    return mainCol.querySelector(':scope > .color-fg-muted') || null;
+  }
+
+  /**
+   * Place the reviewers element on its OWN row, immediately below the
+   * "#<number> opened … by <author>" line. This keeps it clear of GitHub's
+   * right-hand metadata column, whose linked-issue / assignee icons can collide
+   * with injected content. Falls back to the end of the main column, then the
+   * row itself, so we always render something.
    *
    * @param {Element} row
    * @param {HTMLElement} el
    */
   function placeReviewersEl(row, el) {
-    const col = findReviewsColumn(row);
-    if (col) {
-      el.classList.add('prra-in-column');
-      const assigneeSlot = findAssigneeSlot(col);
-      if (assigneeSlot) {
-        col.insertBefore(el, assigneeSlot);
+    const mainCol = findMainColumn(row);
+    if (mainCol) {
+      const openedByLine = findOpenedByLine(mainCol);
+      if (openedByLine) {
+        openedByLine.after(el);
       } else {
-        col.insertBefore(el, col.firstChild);
+        mainCol.appendChild(el);
       }
       return;
     }
-    findFallbackTarget(row).appendChild(el);
+    row.appendChild(el);
   }
 
   /**
@@ -164,7 +138,8 @@
       return null;
     }
 
-    const container = document.createElement('span');
+    // A block-level row of its own (placed below the opened-by line).
+    const container = document.createElement('div');
     container.className = CONTAINER_CLASS;
 
     for (const reviewer of reviewers) {
@@ -270,7 +245,8 @@
       return;
     }
     const firstRow = rows[0];
-    const target = findReviewsColumn(firstRow) || findFallbackTarget(firstRow);
+    const mainCol = findMainColumn(firstRow);
+    const target = (mainCol && findOpenedByLine(mainCol)) || mainCol || firstRow;
     if (target.querySelector(`.${OPTIONS_LINK_CLASS}`)) {
       optionsLinkShown = true;
       return;
