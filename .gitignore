@@ -6,3 +6,6 @@
 *.swp
 .idea/
 .vscode/
+
+# Superpowers brainstorming scratch
+.superpowers/
