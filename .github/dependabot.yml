@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # Keep the pinned GitHub Actions in .github/workflows up to date. Dependabot
+  # opens a PR (which itself goes through the protected-branch review flow)
+  # when a newer release of a pinned action is available.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: ci

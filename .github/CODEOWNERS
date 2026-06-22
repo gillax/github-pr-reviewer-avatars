@@ -1,0 +1,10 @@
+# Code owners for this repository.
+#
+# When the branch-protection ruleset has "require review from Code Owners"
+# enabled, any pull request touching these paths must be approved by an owner
+# listed here before it can be merged. This is what guarantees that changes
+# cannot land without a maintainer's review.
+#
+# The last matching pattern wins, so this catch-all makes the owner the
+# default reviewer for everything in the repo.
+*       @gillax

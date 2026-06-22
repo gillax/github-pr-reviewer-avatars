@@ -147,6 +147,13 @@ response transformation.)
   only; being a member of a **team** that was requested does not flag the PR
   (teams are not expanded to their members).
 
+## Security
+
+Your token stays in `chrome.storage.local` on your device, and only the
+background service worker sends it — exclusively to `api.github.com`. See
+[SECURITY.md](.github/SECURITY.md) for the full threat model, recommended token
+scope, and how to report a vulnerability privately.
+
 ## License
 
-Open source. See the repository for license details.
+[MIT](LICENSE) © gillax
