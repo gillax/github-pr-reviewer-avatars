@@ -1,0 +1,27 @@
+<!--
+  GitHub PR Reviewer Avatars — extension icon (16px source)
+
+  Used only when rendering the 16px PNG. The 24px version's symbol becomes
+  unreadable at 16px, so we use Octicons' hand-tuned 16px variant
+  (git-pull-request-16) for the symbol. Octicons are MIT-licensed
+  (© GitHub, Inc.); see icons/NOTICE.
+
+  Composition:
+    - Same outer ring (#2da44e, stroke-width 6 on a 64x64 canvas)
+    - Same inner fill (#1f2328)
+    - Symbol: Octicons "git-pull-request" 16px variant, recoloured white,
+      scaled to 32px and centered. A larger relative symbol than the 24px
+      version because the 16px Octicon is itself more compact.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Solid disc (black) -->
+  <circle cx="32" cy="32" r="29" fill="#1f2328"/>
+  <!-- Green ring -->
+  <circle cx="32" cy="32" r="29" fill="none" stroke="#2da44e" stroke-width="6"/>
+  <!-- Octicons git-pull-request-16, recoloured white and centered.
+       Source viewBox is 16x16; we scale to 32x32 (factor 2) and translate
+       so the symbol's center (8,8) lands on the disc's center (32,32). -->
+  <g transform="translate(16 16) scale(2)" fill="#ffffff">
+    <path d="M1.5 3.25a2.25 2.25 0 1 1 3 2.122v5.256a2.251 2.251 0 1 1-1.5 0V5.372A2.25 2.25 0 0 1 1.5 3.25Zm5.677-.177L9.573.677A.25.25 0 0 1 10 .854V2.5h1A2.5 2.5 0 0 1 13.5 5v5.628a2.251 2.251 0 1 1-1.5 0V5a1 1 0 0 0-1-1h-1v1.646a.25.25 0 0 1-.427.177L7.177 3.427a.25.25 0 0 1 0-.354ZM3.75 2.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm0 9.5a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm8.25.75a.75.75 0 1 0 1.5 0 .75.75 0 0 0-1.5 0Z"/>
+  </g>
+</svg>

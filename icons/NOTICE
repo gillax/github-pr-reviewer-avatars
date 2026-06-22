@@ -1,0 +1,10 @@
+This extension's icons include artwork derived from GitHub Octicons.
+
+Octicons
+https://github.com/primer/octicons
+Copyright (c) GitHub, Inc.
+Licensed under the MIT License.
+
+Files derived from Octicons:
+  icons/icon.svg     — uses git-pull-request-24.svg
+  icons/icon-16.svg  — uses git-pull-request-16.svg

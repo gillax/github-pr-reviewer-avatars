@@ -91,28 +91,27 @@ Licensed under the MIT License.
 
 `scripts/make-icons.sh` の責務は「`icons/*.svg` から `icons/*.png` を再生成する」ことのみ。
 
-採用ツール: `@resvg/resvg-js-cli` を `npx` 経由で実行（インストールせず一度だけ使う運用）。
+採用ツール: `@resvg/resvg-js@2.6.2`（ライブラリ）。
+
+経緯: 当初 `@resvg/resvg-js-cli` の CLI 版を npx で使う想定だったが、npm レジストリには `2.6.2-beta.1` しか公開されておらず stable 版を pin できなかった。ライブラリ本体は `2.6.2` で stable のため、CLI を介さずライブラリ API を直接 Node から呼ぶ形に切り替えた。
+
+スクリプトの流れ:
+
+1. `mktemp -d` でテンポラリディレクトリを作る
+2. そこへ `npm install --no-save --prefix <tmp> @resvg/resvg-js@2.6.2` で resvg-js を入れる（リポジトリも `$HOME` の global にも一切干渉しない）
+3. 同テンポラリディレクトリに小さな `render.mjs` を書き出し、`createRequire` でテンポラリの `node_modules` を参照させて `@resvg/resvg-js` を require
+4. 4 サイズぶん `node render.mjs <src> <size> <out>` を実行
+5. `trap` で終了時にテンポラリを削除
+
+設計上のポイント:
 
 - `librsvg` / ImageMagick のような OS パッケージ依存をリポジトリに持ち込まない
-- Node がある環境ならどこでも動く
-- バージョンは固定（`@resvg/resvg-js-cli@2.6.2` のような明示）で再現性を担保
+- Node と npm がある環境ならどこでも動く
+- バージョンは `RESVG_VERSION="2.6.2"` でシェル変数固定 → 再現性を担保
+- リポジトリのワーキングツリーには `node_modules/` も `package*.json` も生まれない（auditable / 「ビルドなし」ポリシーと整合）
+- スクリプトは 50 行強。誰が見ても「何が起きているか」が読み取れる
 
-スクリプトの形（疑似）:
-
-```bash
-#!/usr/bin/env bash
-set -euo pipefail
-cd "$(dirname "$0")/.."
-RESVG=(npx --yes @resvg/resvg-js-cli@2.6.2)
-"${RESVG[@]}" -w 16  icons/icon-16.svg -o icons/icon-16.png
-"${RESVG[@]}" -w 32  icons/icon.svg    -o icons/icon-32.png
-"${RESVG[@]}" -w 48  icons/icon.svg    -o icons/icon-48.png
-"${RESVG[@]}" -w 128 icons/icon.svg    -o icons/icon-128.png
-```
-
-数行で完結し、誰が見ても「何が起きているか」が読み取れる。配列で `RESVG` を定義しているのは、`npx` の `--yes` フラグを正しい単一引数として渡すため。
-
-採用バージョン `2.6.2` は仮値。実装時に npm registry で確認した最新安定版を固定する。
+採用バージョン `2.6.2` は実装時点で `npm view @resvg/resvg-js version` の出力（stable）を採用。アップデート時はこの 1 か所を書き換えるだけで済む。
 
 ### 5.1 PNG はリポジトリに含めるか
 
