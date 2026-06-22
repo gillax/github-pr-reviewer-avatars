@@ -15,7 +15,7 @@
 .prra-reviewers {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   margin-top: 4px;
 }
 
@@ -82,23 +82,23 @@
 .prra-reviewer[data-state='APPROVED'] .prra-avatar {
   box-shadow:
     0 0 0 1px var(--color-canvas-default, #ffffff),
-    0 0 0 3px var(--fgColor-success, var(--color-success-fg, #1a7f37));
+    0 0 0 4px var(--fgColor-success, var(--color-success-fg, #1a7f37));
 }
 .prra-reviewer[data-state='CHANGES_REQUESTED'] .prra-avatar {
   box-shadow:
     0 0 0 1px var(--color-canvas-default, #ffffff),
-    0 0 0 3px var(--fgColor-danger, var(--color-danger-fg, #cf222e));
+    0 0 0 4px var(--fgColor-danger, var(--color-danger-fg, #cf222e));
 }
 .prra-reviewer[data-state='COMMENTED'] .prra-avatar {
   box-shadow:
     0 0 0 1px var(--color-canvas-default, #ffffff),
-    0 0 0 3px var(--fgColor-attention, var(--color-attention-fg, #9a6700));
+    0 0 0 4px var(--fgColor-attention, var(--color-attention-fg, #9a6700));
 }
 .prra-reviewer[data-state='PENDING'] .prra-avatar,
 .prra-reviewer[data-state='DISMISSED'] .prra-avatar {
   box-shadow:
     0 0 0 1px var(--color-canvas-default, #ffffff),
-    0 0 0 3px var(--borderColor-muted, var(--color-border-muted, #d0d7de));
+    0 0 0 4px var(--borderColor-muted, var(--color-border-muted, #d0d7de));
 }
 
 /* Team labels echo the same state colours via a left border accent. */
