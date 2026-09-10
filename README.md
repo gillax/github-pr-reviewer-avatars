@@ -26,8 +26,9 @@ and `Authorization` and you will find them only in `src/background.js`.
 
 ## What it shows
 
-On each PR row, on its own line just below the "#&lt;number&gt; opened … by
-&lt;author&gt;" metadata, the extension shows:
+On each PR row, next to the "#&lt;number&gt; opened … by &lt;author&gt;"
+metadata (on its own line below it in GitHub's classic list, inline at the end
+of that line in the newer React list), the extension shows:
 
 - **The avatar of every reviewer.** "Reviewers" means the **union** of:
   - people still **requested** to review (`reviewRequests`), and
@@ -141,6 +142,11 @@ response transformation.)
 ## Scope and limitations
 
 - Only the repository PR list page (`/{owner}/{repo}/pulls`) on **github.com**.
+- Row detection targets both the classic server-rendered list (`.js-issue-row`)
+  and the newer React "ListView" list (`li[class*="ListItem-module__listItem"]`).
+  The React markup uses CSS modules whose class hashes change on every GitHub
+  deploy, so the selectors deliberately match only the stable class prefixes;
+  a larger GitHub redesign can still require an update here.
 - Not the global dashboards (`/pulls`, `/pulls/assigned`) — possible future work.
 - Not GitHub Enterprise Server (custom hosts) — possible future work.
 - The "you are a reviewer" highlight matches **direct** user review requests

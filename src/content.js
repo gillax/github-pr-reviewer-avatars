@@ -40,11 +40,21 @@
    * its markup periodically, so we keep a few fallbacks. A row is only used if
    * we can extract a PR number from it (extractPrNumberFromRow), which filters
    * out non-PR matches.
+   *
+   * Two generations of markup are covered:
+   *   - the classic server-rendered list (.js-issue-row / id="issue_<n>");
+   *   - the React "ListView" rollout, where each row is
+   *     <li id="…-list-view-node-…" class="ListItem-module__listItem__<hash>
+   *     PullsListItem-module__listItem__<hash>">. Those class names are CSS
+   *     modules, so the trailing hash changes on every GitHub deploy — always
+   *     match the stable prefix with [class*=…], never the full class.
    */
   const ROW_SELECTORS = [
-    '.js-issue-row', // long-standing class for issue/PR rows
-    '[id^="issue_"]', // row ids are "issue_<number>"
-    'li[data-id]', // newer list-item rows
+    '.js-issue-row', // classic list: long-standing class for issue/PR rows
+    '[id^="issue_"]', // classic list: row ids are "issue_<number>"
+    'li[class*="ListItem-module__listItem"]', // React ListView rows
+    '[id*="list-view-node"]', // React ListView rows (id-based fallback)
+    'li[data-id]', // older list-item rows
   ];
 
   /**
@@ -65,20 +75,36 @@
   }
 
   /**
-   * Find the main content column of a PR row — the wide column holding the
-   * title, labels and the "#<number> opened … by <author>" metadata line.
-   * Verified against the current github.com PR-list markup:
+   * Find the main content column of a PR row — the part holding the title and
+   * the "#<number> opened … by <author>" metadata line.
+   *
+   * Classic markup:
    *   .js-issue-row > div.d-flex > [state col][THIS .flex-auto.min-width-0 col][meta col]…
+   *
+   * React ListView markup: the row is a CSS grid whose "main-content" area
+   * holds that metadata line, nested as
+   *   li > MainContent-module__container > …__inner > Description-module__container
+   * The Description container is the "#<n> · <author> opened … · <checks>" line
+   * itself, so appending there keeps the avatars next to that text; appending to
+   * the MainContent container instead would push them to the far right of the
+   * row (its inner wrapper is flex: 1 1 auto).
    *
    * @param {Element} row
    * @returns {Element|null}
    */
   function findMainColumn(row) {
     const inner = row.querySelector(':scope > div') || row;
+    const classicCol = Array.from(inner.children).find(
+      (c) => /flex-auto/.test(c.className) && /min-width-0/.test(c.className)
+    );
+    if (classicCol) {
+      return classicCol;
+    }
+    // React ListView (hashed CSS-module classes — match the stable prefix only).
     return (
-      Array.from(inner.children).find(
-        (c) => /flex-auto/.test(c.className) && /min-width-0/.test(c.className)
-      ) || null
+      row.querySelector('[class*="Description-module__container"]') ||
+      row.querySelector('[class*="MainContent-module__container"]') ||
+      null
     );
   }
 
@@ -99,7 +125,13 @@
       if (line) return line;
     }
     // Fallback: a muted, small metadata line directly under the title.
-    return mainCol.querySelector(':scope > .color-fg-muted') || null;
+    const muted = mainCol.querySelector(':scope > .color-fg-muted');
+    if (muted) {
+      return muted;
+    }
+    // React ListView: the metadata line is the column's own inner wrapper, so
+    // there is nothing to insert *after* — placeReviewersEl appends instead.
+    return null;
   }
 
   /**

@@ -156,6 +156,28 @@ test('extractPrNumberFromRow: representative GitHub-like row (id wins over ancho
   assert.equal(extractPrNumberFromRow(row), 900);
 });
 
+test('extractPrNumberFromRow: React ListView row (opaque id, absolute title href)', () => {
+  // GitHub's newer React PR list renders rows as
+  //   <li id="_R_6eko5_-list-view-node-_R_3ueko5_" class="ListItem-module__…">
+  // with no "issue_<n>" id, and an absolute href on the title link. The number
+  // must therefore come from the anchor fallback.
+  const row = makeRow({
+    id: '_R_6eko5_-list-view-node-_R_3ueko5_',
+    hrefs: [
+      'https://github.com/nulab-internal/apps-nulab-account/pull/937',
+      'https://github.com/nulab-internal/apps-nulab-account/issues?q=author%3Aoctocat',
+    ],
+  });
+  assert.equal(extractPrNumberFromRow(row), 937);
+});
+
+test('extractPrNumberFromRow: React ListView id alone does not yield a number', () => {
+  // Guard against the id regex accidentally matching the opaque React ids:
+  // with no /pull/<n> anchor there is nothing to extract.
+  const row = makeRow({ id: '_R_6eko5_-list-view-node-_R_3ueko5_', hrefs: [] });
+  assert.equal(extractPrNumberFromRow(row), null);
+});
+
 test('extractPrNumberFromRow: returns null when nothing identifies a PR', () => {
   const row = makeRow({ id: 'some-unrelated-node', hrefs: ['/octocat/hello-world/issues/5'] });
   assert.equal(extractPrNumberFromRow(row), null);

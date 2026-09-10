@@ -19,6 +19,18 @@
   margin-top: 4px;
 }
 
+/* GitHub's React "ListView" markup has no separate row to sit on: the avatars
+   join the existing "#<n> · <author> opened … · <checks>" line, so they render
+   inline right after it instead of starting a new row.
+   These are CSS modules whose class hash changes per deploy — prefix match only. */
+[class*="Description-module__container"] > .prra-reviewers,
+[class*="MainContent-module__container"] > .prra-reviewers {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-top: 0;
+  margin-left: 8px;
+}
+
 /* Highlight a PR row when YOU (the token owner) are one of its reviewers, so it
    stands out in the list. Uses GitHub's own attention colour (which adapts to
    light/dark themes) with safe fallbacks for older Primer versions. */
