@@ -14,8 +14,10 @@ permissions:
   contents: read
 
 jobs:
+  # The job id doubles as the status check context that the branch-protection
+  # ruleset requires ("test"), so do not add a `name:` here — it would rename
+  # the context and leave the required check waiting forever.
   test:
-    name: node --test
     runs-on: ubuntu-latest
     steps:
       # Actions are pinned to a commit SHA (not a moving tag) so a compromised
